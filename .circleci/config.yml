@@ -33,6 +33,7 @@ jobs:
     
     steps:
       - checkout
+      - run: apk update && apk add curl curl-dev bash
       - run:
           name: Check connectivity of https://blog.udacity.com/ site
           command: |
