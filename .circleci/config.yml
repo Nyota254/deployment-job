@@ -2,22 +2,54 @@ version: 2.1
 
 
 jobs:
-  create_infrastructure:
+
+####################################################################
+# Infrastructure creation job
+####################################################################
+  # create_infrastructure:
+  #   docker:
+  #     - image: amazon/aws-cli
+    
+  #   steps:
+  #     - checkout
+  #     - run:
+  #         name: Create Cloudformation Stack
+  #         command: |
+  #           aws cloudformation deploy \
+  #             --template-file infra-launcher.yml \
+  #             --stack-name myStack-${CIRCLE_WORKFLOW_ID:0:5} \
+  #             --region us-east-1
+####################################################################
+#Infrastructure creation job ending
+####################################################################
+
+#####################################################################
+#Smoke Test Job
+#####################################################################
+
+  smoke_test:
     docker:
-      - image: amazon/aws-cli
+      - image: alpine/latest
     
     steps:
       - checkout
       - run:
-          name: Create Cloudformation Stack
+          name: Check connectivity of https://blog.udacity.com/ site
           command: |
-            aws cloudformation deploy \
-              --template-file infra-launcher.yml \
-              --stack-name myStack-${CIRCLE_WORKFLOW_ID:0:5} \
-              --region us-east-1
+            URL="https://blog.udacity.com/"
 
+            if curl -s --head ${URL} 
+            then
+              return 0
+            else
+              return 1
+            fi
 
 workflows:
-  create-infrastructure-workflow:
+  # create-infrastructure-workflow:
+  #   jobs:
+  #     - create_infrastructure
+
+  my-workflow:
     jobs:
-      - create_infrastructure
+      - smoke_test
