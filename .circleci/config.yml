@@ -16,48 +16,8 @@ jobs:
               --stack-name myStack-${CIRCLE_WORKFLOW_ID:0:5} \
               --region us-east-1
 
-  add_ip_to_inventory_file:
-    docker:
-      - image: amazon/aws-cli
-
-    steps:
-      - checkout
-      - run:
-          name: Copy Ip address of server to inventory
-          command: |
-            aws ec2 describe-instances \
-              --query 'Reservations[*].Instances[*].PublicIpAddress' \
-              --filters 'Name=tag:Name,Values=Udacity' \
-              --output text >> inventory
-            aws ec2 describe-instances \
-              --query 'Reservations[*].Instances[*].PublicIpAddress' \
-              --filters 'Name=tag:Name,Values=Udacity' \
-              --output text
-
-  configure_infrastructure:
-    docker:
-      - image:  python:3.7-alpine3.11
-    steps:
-      - checkout
-      - add_ssh_keys:
-          fingerprints: ["0f:4c:b2:88:fd:fb:b1:61:fe:fc:c0:b3:a0:06:b0:32"]
-      - run:
-          name: Install Ansible
-          command: |
-            apk add --update ansible
-      - run:
-          name: Run Playbook and Configure server
-          command: |
-            ansible-playbook -i inventory main.yml
 
 workflows:
   create-infrastructure-workflow:
     jobs:
       - create_infrastructure
-      - add_ip_to_inventory_file:
-          requires:
-            - create_infrastructure
-      - configure_infrastructure:
-          requires:
-            - add_ip_to_inventory_file
-
