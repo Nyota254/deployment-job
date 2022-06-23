@@ -1,2 +1,4 @@
 #My virtual environment
 ansibleenv/
+#Private Key
+cicd.pem
