@@ -79,7 +79,7 @@ jobs:
               --stack-name create-bucket-${CIRCLE_WORKFLOW_ID:0:5} \
               --parameter-overrides MyBucketName="my-${CIRCLE_WORKFLOW_ID:0:5}-bucket" \
               --tags project=udapeople
-      - run: aws s3 sync index.html s3://my-${CIRCLE_WORKFLOW_ID:0:5}-bucket --delete
+      # - run: aws s3 sync . s3://my-${CIRCLE_WORKFLOW_ID:0:5}-bucket --delete
 workflows:
   # create-infrastructure-workflow:
   #   jobs:
