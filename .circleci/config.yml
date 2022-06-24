@@ -67,7 +67,7 @@ jobs:
 
   create_and_deploy_frontend:
     docker:
-      - image: amazon:aws/cli
+      - image: amazon/aws-cli
 
     steps:
       - checkout
