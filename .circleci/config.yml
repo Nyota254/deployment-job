@@ -1,13 +1,13 @@
 version: 2.1
 
-commands:
-  destroy_environment:
-    steps:
-      - run:
-          name: Destroy environment
-          when: on_fail
-          command: |
-            aws cloudformation delete-stack --stack-name myStack-${CIRCLE_WORKFLOW_ID:0:5}
+# commands:
+#   destroy_environment:
+#     steps:
+#       - run:
+#           name: Destroy environment
+#           when: on_fail
+#           command: |
+#             aws cloudformation delete-stack --stack-name myStack-${CIRCLE_WORKFLOW_ID:0:5}
 
 jobs:
 
@@ -15,19 +15,19 @@ jobs:
 # Infrastructure creation job
 ####################################################################
 
-  create_infrastructure:
-    docker:
-      - image: amazon/aws-cli
+  # create_infrastructure:
+  #   docker:
+  #     - image: amazon/aws-cli
     
-    steps:
-      - checkout
-      - run:
-          name: Create Cloudformation Stack
-          command: |
-            aws cloudformation deploy \
-              --template-file infra-launcher.yml \
-              --stack-name myStack-${CIRCLE_WORKFLOW_ID:0:5} \
-              --region us-east-1
+  #   steps:
+  #     - checkout
+  #     - run:
+  #         name: Create Cloudformation Stack
+  #         command: |
+  #           aws cloudformation deploy \
+  #             --template-file infra-launcher.yml \
+  #             --stack-name myStack-${CIRCLE_WORKFLOW_ID:0:5} \
+  #             --region us-east-1
 
 ####################################################################
 #Infrastructure creation job ending
@@ -37,26 +37,49 @@ jobs:
 #Smoke Test Job
 #####################################################################
 
-  smoke_test:
-    docker:
-      - image: amazon/aws-cli
+  # smoke_test:
+  #   docker:
+  #     - image: amazon/aws-cli
     
+  #   steps:
+  #     - checkout
+  #     # - run: apk update && apk add curl curl-dev bash
+  #     - run:
+  #         name: Check connectivity of https://blog.udacity.com/ site
+  #         command: |
+  #           URL="https://blog.udacity777.com/"
+
+  #           if curl -s --head ${URL} 
+  #           then
+  #             return 0
+  #           else
+  #             return 1
+  #           fi
+  #     - destroy_environment
+
+###########################################################################
+#Smoke test end
+##########################################################################
+
+#########################################################################
+#Create and Deploy Front end
+########################################################################
+
+  create_and_deploy_frontend:
+    docker:
+      - image: amazon:aws/cli
+
     steps:
       - checkout
-      - run: apk update && apk add curl curl-dev bash
       - run:
-          name: Check connectivity of https://blog.udacity.com/ site
+          name: creates new bucket and copys files into the bucket
           command: |
-            URL="https://blog.udacity777.com/"
-
-            if curl -s --head ${URL} 
-            then
-              return 0
-            else
-              return 1
-            fi
-      - destroy_environment
-
+            aws cloudformation deploy \
+              --template-file bucket.yml \
+              --stack-name create-bucket-${CIRCLE_WORKFLOW_ID:0:5} \
+              --parameter-overrides PipelineID="my-${CIRCLE_WORKFLOW_ID:0:5}-bucket" \
+              --tags project=udapeople
+      - run: aws s3 sync index.html s3://my-${CIRCLE_WORKFLOW_ID:0:5}-bucket --delete
 workflows:
   # create-infrastructure-workflow:
   #   jobs:
@@ -64,7 +87,8 @@ workflows:
 
   my-workflow:
     jobs:
-      - create_infrastructure
-      - smoke_test:
-          requires:
-            - create_infrastructure
+      - create_and_deploy_frontend
+      # - create_infrastructure
+      # - smoke_test:
+      #     requires:
+      #       - create_infrastructure
