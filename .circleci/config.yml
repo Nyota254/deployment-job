@@ -77,7 +77,7 @@ jobs:
             aws cloudformation deploy \
               --template-file bucket.yml \
               --stack-name create-bucket-${CIRCLE_WORKFLOW_ID:0:5} \
-              --parameter-overrides PipelineID="my-${CIRCLE_WORKFLOW_ID:0:5}-bucket" \
+              --parameter-overrides MyBucketName="my-${CIRCLE_WORKFLOW_ID:0:5}-bucket" \
               --tags project=udapeople
       - run: aws s3 sync index.html s3://my-${CIRCLE_WORKFLOW_ID:0:5}-bucket --delete
 workflows:
